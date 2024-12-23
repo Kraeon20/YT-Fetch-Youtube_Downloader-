@@ -1,101 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QPushButton, QLineEdit, QLabel, QFileDialog, QDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QPushButton, QLineEdit, QLabel, QFileDialog, QDialog
 from PyQt5.QtCore import Qt
 import sys
 from downloader import download_video
-
-
-class SettingsWindow(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Settings")
-        self.setFixedSize(400, 200)
-        self.setStyleSheet("background-color: #2E2E2E; color: #FFFFFF; font-family: Arial, sans-serif;")
-        self.download_location = ""
-
-        self.init_ui()
-
-    def init_ui(self):
-        layout = QVBoxLayout()
-
-        header_label = QLabel("Settings")
-        header_label.setAlignment(Qt.AlignCenter)
-        header_label.setStyleSheet("font-size: 20px; font-weight: bold; margin-bottom: 15px;")
-
-        download_location_label = QLabel("Download Location:")
-        download_location_label.setStyleSheet("font-size: 16px; margin-bottom: 10px;")
-
-        # Horizontal layout for QLineEdit and Browse button
-        download_location_layout = QHBoxLayout()
-        self.download_location_input = QLineEdit()
-        self.download_location_input.setPlaceholderText("Set your download location...")
-        self.download_location_input.setStyleSheet(
-            "background-color: #444444; color: #FFFFFF; border: 1px solid #555555; padding: 8px;"
-        )
-        self.download_location_input.setText(self.download_location)
-
-        browse_button = QPushButton("Browse")
-        browse_button.setFixedSize(80, 30)
-        browse_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #4CAF50; 
-                color: white; 
-                font-size: 14px; 
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            """
-        )
-        browse_button.setCursor(Qt.PointingHandCursor)
-        browse_button.clicked.connect(self.on_browse_clicked)
-
-        download_location_layout.addWidget(self.download_location_input)
-        download_location_layout.addWidget(browse_button)
-
-        save_button = QPushButton("Save")
-        save_button.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #007BFF; 
-                color: white; 
-                font-size: 14px; 
-                padding: 8px 12px; 
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #0056b3;
-            }
-            """
-        )
-        save_button.setCursor(Qt.PointingHandCursor)
-        save_button.clicked.connect(self.on_save_clicked)
-
-        # Center align Save button
-        button_layout = QHBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(save_button)
-        button_layout.addStretch()
-
-        layout.addWidget(header_label)
-        layout.addWidget(download_location_label)
-        layout.addLayout(download_location_layout)
-        layout.addStretch()
-        layout.addLayout(button_layout)
-
-        self.setLayout(layout)
-
-    def on_browse_clicked(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Download Folder")
-        if folder:
-            self.download_location_input.setText(folder)
-
-    def on_save_clicked(self):
-        self.download_location = self.download_location_input.text().strip()
-        if not self.download_location:
-            self.download_location = QFileDialog.getExistingDirectory(self, "Please select a download folder")
-        self.accept()
+from utils import SettingsWindow
 
 
 class YouTubeDownloaderApp(QWidget):
@@ -104,10 +11,9 @@ class YouTubeDownloaderApp(QWidget):
         self.setWindowTitle("YouTube Video Downloader")
         self.setGeometry(100, 100, 600, 300)
         self.theme = "dark"  # Default theme
-        self.update_theme()
-
         self.download_location = ""
         self.init_ui()
+        self.update_theme()
 
     def init_ui(self):
         main_layout = QVBoxLayout()
@@ -134,13 +40,13 @@ class YouTubeDownloaderApp(QWidget):
         theme_button.setFixedSize(40, 40)
         theme_button.setStyleSheet("""
             QPushButton {
-                background-color: #007BFF; 
+                background-color: #007FFF; 
                 color: white; 
                 font-size: 18px; 
                 border-radius: 20px;
             }
             QPushButton:hover {
-                background-color: #0056b3;
+                background-color: #0066b2;
             }
         """)
         theme_button.setCursor(Qt.PointingHandCursor)
@@ -215,11 +121,39 @@ class YouTubeDownloaderApp(QWidget):
 
         self.setLayout(main_layout)
 
+    def get_button_style(self, color):
+        if color == "green":
+            return """
+                QPushButton {
+                    background-color: #4CAF50; 
+                    color: white; 
+                    font-size: 14px; 
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #45a049;
+                }
+            """
+        elif color == "blue":
+            return """
+                QPushButton {
+                    background-color: #007BFF; 
+                    color: white; 
+                    font-size: 14px; 
+                    padding: 8px 12px; 
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #0056b3;
+                }
+            """
+        return ""
+
     def open_settings(self):
         settings_window = SettingsWindow(self)
+        settings_window.update_theme(self.theme)  # Pass the current theme
         if settings_window.exec_() == QDialog.Accepted:
             self.download_location = settings_window.download_location
-
     def on_download_clicked(self):
         url = self.url_input.text().strip()
         if not url:
@@ -257,5 +191,39 @@ class YouTubeDownloaderApp(QWidget):
     def update_theme(self):
         if self.theme == "dark":
             self.setStyleSheet("background-color: #2E2E2E; color: #FFFFFF; font-family: Arial, sans-serif;")
+            self.url_input.setStyleSheet("background-color: #444444; color: #FFFFFF; border: 1px solid #555555; padding: 10px;")
+            self.status_area.setStyleSheet("""
+                background-color: #444444; 
+                border: 1px solid #555555; 
+                padding: 10px; 
+                margin-top: 10px;
+                border-radius: 12px;
+            """)
+            self.status_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #F0A500;")
+            self.progress_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #4AA8D8;")
+            self.video_title_label.setStyleSheet("font-size: 14px; text-align: left; color: #FFFFFF;")
         else:
+            # Light theme styles
             self.setStyleSheet("background-color: #FFFFFF; color: #000000; font-family: Arial, sans-serif;")
+            self.url_input.setStyleSheet("background-color: #FFFFFF; color: #000000; border: 1px solid #CCCCCC; padding: 10px;")
+            self.status_area.setStyleSheet("""
+                background-color: #F0F0F0; 
+                border: 1px solid #CCCCCC; 
+                padding: 10px; 
+                margin-top: 10px;
+                border-radius: 12px;
+            """)
+            self.status_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #007BFF;")
+            self.progress_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #007BFF;")
+            self.video_title_label.setStyleSheet("font-size: 14px; text-align: left; color: #000000;")
+
+        # Update the settings window theme as well
+        if hasattr(self, 'settings_window'):
+            self.settings_window.update_theme(self.theme)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = YouTubeDownloaderApp()
+    window.show()
+    sys.exit(app.exec_())

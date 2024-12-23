@@ -6,5 +6,6 @@ YDL_OPTIONS = {
     'noplaylist': True,  
     'quiet': True,  
     'extractaudio': False,  
-    'merge_output_format': 'mp4',  
+    'merge_output_format': 'mp4',
+    'geo_bypass': True,
 }
