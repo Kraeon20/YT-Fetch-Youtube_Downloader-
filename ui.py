@@ -1,16 +1,15 @@
-
+import sys
 from utils import SettingsWindow
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import (QLabel, QDialog, 
                              QWidget, QVBoxLayout, 
                              QPushButton, QLineEdit,
-                             QGridLayout, QHBoxLayout,)
+                             QGridLayout, QHBoxLayout, QProgressBar, QApplication)
 from settings import SettingsManager
 
 
 class DownloadThread(QThread):
-    update_status = pyqtSignal(str, str, str)
-
+    update_status = pyqtSignal(str, str, str, float)
     def __init__(self, url, save_path):
         super().__init__()
         self.url = url
@@ -20,16 +19,16 @@ class DownloadThread(QThread):
         from downloader import download_video_thread
         download_video_thread(self.url, self.save_path, self.emit_status)
 
-    def emit_status(self, status, title, progress):
-        self.update_status.emit(status, title, progress)
-
-
+    def emit_status(self, status, title, progress, percentage):
+        # Ensure percentage is a float
+        percentage = percentage if isinstance(percentage, float) else 0.0
+        self.update_status.emit(status, title, progress, percentage)
 
 class YouTubeDownloaderApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("YouTube Video Downloader")
-        self.setFixedSize(700, 400)
+        self.setGeometry(900, 200, 100, 300)
         self.settings_manager = SettingsManager()
         self.theme = self.settings_manager.get("theme", "dark")
         self.download_location = self.settings_manager.get("download_location", "")
@@ -135,11 +134,28 @@ class YouTubeDownloaderApp(QWidget):
 
         self.status_area.setLayout(status_layout)
 
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, 100)
+        self.progress_bar.setFixedHeight(10)
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setStyleSheet("""
+            QProgressBar {
+                background-color: #444444;
+                border: 1px solid #555555;
+                border-radius: 5px;
+            }
+            QProgressBar::chunk {
+                background-color: #4CAF50;
+                border-radius: 5px;
+            }
+        """)
+        status_layout.addWidget(self.progress_bar, 2, 0, 1, 2)
+
+        # Final Layout
         main_layout.addLayout(header_layout)
         main_layout.addWidget(self.url_input)
         main_layout.addLayout(button_layout)
         main_layout.addWidget(self.status_area)
-
         self.setLayout(main_layout)
 
     def get_button_style(self, color):
@@ -214,19 +230,22 @@ class YouTubeDownloaderApp(QWidget):
         self.download_thread.update_status.connect(self.update_status)
         self.download_thread.start()
     
-    def update_status(self, download_status, video_title, progress):
+    def update_status(self, download_status, video_title, progress, percentage=None):
         if download_status == "Downloading...":
-            self.status_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #4CAF50;")
+            self.status_label.setText(download_status)
+            self.status_label.setStyleSheet("color: #4CAF50;")
         elif download_status == "Error":
-            self.status_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #E57373;")
+            self.status_label.setText(download_status)
+            self.status_label.setStyleSheet("color: #E57373;")
         elif download_status == "Completed":
-            self.status_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #81C784;")
-        else:
-            self.status_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #F0A500;")
+            self.status_label.setText(download_status)
+            self.status_label.setStyleSheet("color: #81C784;")
 
-        self.status_label.setText(download_status)
         self.video_title_label.setText(video_title)
         self.progress_label.setText(progress)
+
+        if percentage is not None:
+            self.progress_bar.setValue(int(percentage))
 
     def toggle_theme(self):
         """Toggle between dark and light themes."""
@@ -270,4 +289,11 @@ class YouTubeDownloaderApp(QWidget):
         # Update the settings window theme as well
         if hasattr(self, 'settings_window'):
             self.settings_window.update_theme(self.theme)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    downloader_ui = YouTubeDownloaderApp()
+    downloader_ui.show()
+    sys.exit(app.exec_())
 
