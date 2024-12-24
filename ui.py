@@ -1,7 +1,14 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QPushButton, QLineEdit, QLabel, QFileDialog, QDialog
-from PyQt5.QtCore import Qt, QThread, pyqtSignal
-import sys
+
+import os
+import json
 from utils import SettingsWindow
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
+from PyQt5.QtWidgets import (QLabel, QDialog, 
+                             QWidget, QVBoxLayout, 
+                             QPushButton, QLineEdit,
+                             QGridLayout, QHBoxLayout,)
+from settings import SettingsManager
+
 
 class DownloadThread(QThread):
     update_status = pyqtSignal(str, str, str)
@@ -24,9 +31,10 @@ class YouTubeDownloaderApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("YouTube Video Downloader")
-        self.setGeometry(100, 100, 600, 300)
-        self.theme = "dark"
-        self.download_location = ""
+        self.setFixedSize(700, 400)
+        self.settings_manager = SettingsManager()
+        self.theme = self.settings_manager.get("theme", "dark")
+        self.download_location = self.settings_manager.get("download_location", "")
         self.init_ui()
         self.update_theme()
 
@@ -164,11 +172,34 @@ class YouTubeDownloaderApp(QWidget):
             """
         return ""
 
+    # def load_settings(self):
+    #     """Load settings from a JSON file."""
+    #     settings_file = "settings.json"
+    #     if os.path.exists(settings_file):
+    #         with open(settings_file, "r") as f:
+    #             settings = json.load(f)
+    #             self.download_location = settings.get("download_location", "")
+    
+    # def save_settings(self):
+    #     """Save settings to a JSON file."""
+    #     settings_file = "settings.json"
+    #     settings = {
+    #         "download_location": self.download_location
+    #     }
+    #     with open(settings_file, "w") as f:
+    #         json.dump(settings, f)
+
     def open_settings(self):
+        """Open the settings window and save changes."""
         settings_window = SettingsWindow(self)
-        settings_window.update_theme(self.theme)  # Pass the current theme
+        settings_window.update_theme(self.theme)
+        settings_window.download_location = self.download_location
+
         if settings_window.exec_() == QDialog.Accepted:
             self.download_location = settings_window.download_location
+            self.settings_manager.set("download_location", self.download_location)
+
+
     def on_download_clicked(self):
         url = self.url_input.text().strip()
         if not url:
@@ -184,6 +215,7 @@ class YouTubeDownloaderApp(QWidget):
         self.download_thread = DownloadThread(url, self.download_location)
         self.download_thread.update_status.connect(self.update_status)
         self.download_thread.start()
+    
     def update_status(self, download_status, video_title, progress):
         if download_status == "Downloading...":
             self.status_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #4CAF50;")
@@ -199,13 +231,16 @@ class YouTubeDownloaderApp(QWidget):
         self.progress_label.setText(progress)
 
     def toggle_theme(self):
+        """Toggle between dark and light themes."""
         if self.theme == "dark":
             self.theme = "light"
         else:
             self.theme = "dark"
         self.update_theme()
+        self.settings_manager.set("theme", self.theme)
 
     def update_theme(self):
+        """Apply the selected theme to the UI."""
         if self.theme == "dark":
             self.setStyleSheet("background-color: #2E2E2E; color: #FFFFFF; font-family: Arial, sans-serif;")
             self.url_input.setStyleSheet("background-color: #444444; color: #FFFFFF; border: 1px solid #555555; padding: 10px;")
@@ -220,7 +255,6 @@ class YouTubeDownloaderApp(QWidget):
             self.progress_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #4AA8D8;")
             self.video_title_label.setStyleSheet("font-size: 14px; text-align: left; color: #FFFFFF;")
         else:
-            # Light theme styles
             self.setStyleSheet("background-color: #FFFFFF; color: #000000; font-family: Arial, sans-serif;")
             self.url_input.setStyleSheet("background-color: #FFFFFF; color: #000000; border: 1px solid #CCCCCC; padding: 10px;")
             self.status_area.setStyleSheet("""
@@ -234,13 +268,8 @@ class YouTubeDownloaderApp(QWidget):
             self.progress_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #007BFF;")
             self.video_title_label.setStyleSheet("font-size: 14px; text-align: left; color: #000000;")
 
+
         # Update the settings window theme as well
         if hasattr(self, 'settings_window'):
             self.settings_window.update_theme(self.theme)
 
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = YouTubeDownloaderApp()
-    window.show()
-    sys.exit(app.exec_())
