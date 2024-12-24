@@ -1,6 +1,4 @@
 
-import os
-import json
 from utils import SettingsWindow
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtWidgets import (QLabel, QDialog, 
