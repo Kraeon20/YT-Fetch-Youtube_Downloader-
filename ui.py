@@ -1,8 +1,23 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout, QPushButton, QLineEdit, QLabel, QFileDialog, QDialog
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 import sys
-from downloader import download_video
 from utils import SettingsWindow
+
+class DownloadThread(QThread):
+    update_status = pyqtSignal(str, str, str)
+
+    def __init__(self, url, save_path):
+        super().__init__()
+        self.url = url
+        self.save_path = save_path
+
+    def run(self):
+        from downloader import download_video_thread
+        download_video_thread(self.url, self.save_path, self.emit_status)
+
+    def emit_status(self, status, title, progress):
+        self.update_status.emit(status, title, progress)
+
 
 
 class YouTubeDownloaderApp(QWidget):
@@ -10,7 +25,7 @@ class YouTubeDownloaderApp(QWidget):
         super().__init__()
         self.setWindowTitle("YouTube Video Downloader")
         self.setGeometry(100, 100, 600, 300)
-        self.theme = "dark"  # Default theme
+        self.theme = "dark"
         self.download_location = ""
         self.init_ui()
         self.update_theme()
@@ -165,8 +180,10 @@ class YouTubeDownloaderApp(QWidget):
             return
 
         self.update_status("Downloading...", "Fetching video info...", "0.00 MiB/s ETA --:--")
-        download_video(url, self.download_location, self.update_status)
 
+        self.download_thread = DownloadThread(url, self.download_location)
+        self.download_thread.update_status.connect(self.update_status)
+        self.download_thread.start()
     def update_status(self, download_status, video_title, progress):
         if download_status == "Downloading...":
             self.status_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #4CAF50;")
