@@ -3,7 +3,9 @@
 a = Analysis(
     ['main.py'],  
     pathex=['.'],  
-    binaries=[],
+    binaries=[
+    ('ffmpeg/ffmpeg', 'ffmpeg/ffmpeg'),
+    ],
     datas=[
         ('config.py', '.'),       
         ('downloader.py', '.'),   
