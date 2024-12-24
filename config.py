@@ -1,7 +1,7 @@
 # config.py
 
 YDL_OPTIONS = {
-    'format': 'best',  
+    'format': 'bestvideo*+bestaudio/best',  
     'outtmpl': '%(title)s.%(ext)s',  
     'noplaylist': True,  
     'quiet': True,  

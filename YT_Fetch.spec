@@ -9,8 +9,7 @@ a = Analysis(
         ('downloader.py', '.'),   
         ('settings.py', '.'),     
         ('utils.py', '.'),        
-        ('icon.ico', '.'), 
-        ('data/*', 'data/'),
+        ('icon.ico', '.'),        
     ],
     hiddenimports=[
         'yt_dlp', 'PyQt5.QtCore', 'PyQt5.QtGui', 'PyQt5.QtWidgets'
