@@ -25,17 +25,4 @@ Clone the repository to your local machine:
 git clone https://github.com/yourusername/video-downloader.git
 cd video-downloader
 
----
 
-### **2. Clone the Repository**
-Ensure you have Python 3.7+ installed. Then, install the required dependencies by running the following command in your terminal or command prompt:
-
-```bash
-pip install -r requirements.txt
-
----
-
-### **3. Run the Applicationy**
-To start the downloader, simply run the following command:
-```bash
-python main.py
