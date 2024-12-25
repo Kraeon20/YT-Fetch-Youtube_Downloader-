@@ -1,0 +1,25 @@
+# **Video Downloader with Progress Tracker** 🎥📥
+
+This is a Python-based video downloader powered by **yt-dlp**, featuring a **modern GUI** built with PyQt5. The downloader tracks and displays progress as a percentage and file size (e.g., `35.2% of 200.00 MiB`), ensuring a user-friendly experience.
+
+---
+
+## **Features** ✨
+- 🎯 Simple and elegant UI to download videos.
+- 📊 Real-time progress updates showing the percentage of the downloaded file size.
+- 📂 Customizable save location for downloaded videos.
+- ⚡ Fast and efficient, powered by the **yt-dlp** library.
+- 🔧 Supports YouTube and a variety of other platforms.
+
+---
+
+## **Getting Started** 🚀
+
+Follow these steps to set up the project and start downloading videos:
+
+### **1. Clone the Repository**
+Clone the repository to your local machine:
+
+```bash
+git clone https://github.com/yourusername/video-downloader.git
+cd video-downloader
