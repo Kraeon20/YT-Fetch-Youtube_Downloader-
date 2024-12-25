@@ -1,4 +1,5 @@
-# **Video Downloader with Progress Tracker** 🎥📥
+# **YT Fetch** 🎥📥
+## **A Youtube Video Downloader ✨
 
 This is a Python-based video downloader powered by **yt-dlp**, featuring a **modern GUI** built with PyQt5. The downloader tracks and displays progress as a percentage and file size (e.g., `35.2% of 200.00 MiB`), ensuring a user-friendly experience.
 
