@@ -8,7 +8,6 @@ class SettingsManager:
             "download_location": "",
             "theme": "light"
         }
-        # Determine the settings file path
         if file_path is None:
             if getattr(sys, 'frozen', False):  
                 base_path = sys._MEIPASS

@@ -2,10 +2,9 @@
 import os
 import sys
 
-# Determine the ffmpeg path dynamically
-if getattr(sys, 'frozen', False):  # If running as a PyInstaller bundle
+if getattr(sys, 'frozen', False):  
     FFMPEG_PATH = os.path.join(sys._MEIPASS, 'ffmpeg', 'ffmpeg')
-else:  # Running from the source code
+else:  
     FFMPEG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'ffmpeg', 'ffmpeg')
 
 YDL_OPTIONS = {

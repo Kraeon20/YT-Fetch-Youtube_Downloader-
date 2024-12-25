@@ -20,15 +20,15 @@ class DownloadThread(QThread):
         download_video_thread(self.url, self.save_path, self.emit_status)
 
     def emit_status(self, status, title, progress, percentage):
-        # Ensure percentage is a float
         percentage = percentage if isinstance(percentage, float) else 0.0
         self.update_status.emit(status, title, progress, percentage)
+
 
 class YouTubeDownloaderApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("YouTube Video Downloader")
-        self.setGeometry(900, 200, 100, 300)
+        self.setWindowTitle("YT Fetch")
+        self.setFixedSize(700, 400)
         self.settings_manager = SettingsManager()
         self.theme = self.settings_manager.get("theme", "dark")
         self.download_location = self.settings_manager.get("download_location", "")
@@ -72,7 +72,7 @@ class YouTubeDownloaderApp(QWidget):
         theme_button.setCursor(Qt.PointingHandCursor)
         theme_button.clicked.connect(self.toggle_theme)
 
-        header_label = QLabel("YouTube Video Downloader")
+        header_label = QLabel("YT Fetch")
         header_label.setStyleSheet("font-size: 24px; font-weight: bold;")
         header_label.setAlignment(Qt.AlignCenter)
 
@@ -186,22 +186,6 @@ class YouTubeDownloaderApp(QWidget):
             """
         return ""
 
-    # def load_settings(self):
-    #     """Load settings from a JSON file."""
-    #     settings_file = "settings.json"
-    #     if os.path.exists(settings_file):
-    #         with open(settings_file, "r") as f:
-    #             settings = json.load(f)
-    #             self.download_location = settings.get("download_location", "")
-    
-    # def save_settings(self):
-    #     """Save settings to a JSON file."""
-    #     settings_file = "settings.json"
-    #     settings = {
-    #         "download_location": self.download_location
-    #     }
-    #     with open(settings_file, "w") as f:
-    #         json.dump(settings, f)
 
     def open_settings(self):
         """Open the settings window and save changes."""
@@ -285,15 +269,6 @@ class YouTubeDownloaderApp(QWidget):
             self.progress_label.setStyleSheet("font-size: 14px; font-weight: bold; color: #007BFF;")
             self.video_title_label.setStyleSheet("font-size: 14px; text-align: left; color: #000000;")
 
-
-        # Update the settings window theme as well
         if hasattr(self, 'settings_window'):
             self.settings_window.update_theme(self.theme)
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    downloader_ui = YouTubeDownloaderApp()
-    downloader_ui.show()
-    sys.exit(app.exec_())
 
